@@ -194,6 +194,9 @@ def main():
     # inject the background wallpaper before rendering UI
     inject_background()
 
+    # render the top navigation bar
+    render_navbar()
+
     if not st.session_state.authenticated:
         do_login()
     else:
@@ -266,6 +269,77 @@ def inject_background(blur_px: int = 12, overlay_alpha: float = 0.25):
     except Exception as e:
         st.error(f"Error loading background image: {str(e)}")
         return False
+
+
+def render_navbar():
+    """Render a simple top navigation bar that respects login state."""
+    # CSS for a sticky top navbar
+    st.markdown(
+        """
+    <style>
+    .top-nav {
+        position: sticky;
+        top: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 1rem;
+        background: rgba(0,0,0,0.35);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        color: #fff;
+    }
+    .top-nav .nav-left { display:flex; align-items:center; gap:0.75rem; }
+    .nav-logo { font-weight:700; font-size:1.1rem; }
+    .nav-links a { color: #ddd; margin: 0 0.6rem; text-decoration: none; }
+    .nav-links a:hover { color: #fff; text-decoration: underline; }
+    .nav-right { display:flex; align-items:center; gap:0.5rem; }
+    .nav-btn { background: rgba(255,255,255,0.06); padding:0.35rem 0.6rem; border-radius:6px; color:#fff; }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+    # Layout the navbar using Streamlit columns to allow Python-driven buttons
+    nav_container = st.container()
+    with nav_container:
+        cols = st.columns([1, 2, 1])
+        with cols[0]:
+            st.markdown(
+                """
+            <div class="top-nav">
+                <div class="nav-left">
+                    <div class="nav-logo">My Webpage</div>
+                </div>
+            """,
+                unsafe_allow_html=True,
+            )
+        with cols[1]:
+            st.markdown(
+                """
+                <div style='text-align:center' class='nav-links'>
+                    <a href='#'>Home</a>
+                    <a href='#about'>About</a>
+                    <a href='#contact'>Contact</a>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with cols[2]:
+            # Right side: Login / Logout buttons using Streamlit controls
+            if st.session_state.get("authenticated"):
+                if st.button("Logout", key="nav_logout"):
+                    do_logout()
+            else:
+                if st.button("Login", key="nav_login"):
+                    # bring user to top/login area by rerunning (UI shows login card by default)
+                    st.experimental_set_query_params(show="login")
+                    st.experimental_rerun()
+
+    # close the nav wrapper div (inlined into left column above) and ensure content spacing
+    st.markdown("</div>", unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
