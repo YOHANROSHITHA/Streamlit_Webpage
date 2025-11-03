@@ -217,10 +217,7 @@ def inject_background(blur_px: int = 12, overlay_alpha: float = 0.25):
             image_data = base64.b64encode(f.read()).decode()
             
         bg_data_url = f"data:image/jpeg;base64,{image_data}"
-    except Exception as e:
-        st.error(f"Error loading background image: {str(e)}")
-        return False
-        
+
         css = f"""
         <style>
         /* Main app container */
@@ -265,6 +262,10 @@ def inject_background(blur_px: int = 12, overlay_alpha: float = 0.25):
         """
 
         st.markdown(css, unsafe_allow_html=True)
+        return True
+    except Exception as e:
+        st.error(f"Error loading background image: {str(e)}")
+        return False
 
 
 if __name__ == "__main__":
